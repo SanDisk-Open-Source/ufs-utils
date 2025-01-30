@@ -182,21 +182,17 @@ out:
 static int verify_and_set_index(struct tool_options *options)
 {
 	int index = INVALID;
+	char *endptr;
+
+	errno = 0;
 
 	if (options->index != INVALID) {
 		print_error("duplicated index");
 		goto out;
 	}
 
-	/* In case atoi returned 0 . Check that is real 0 and not error
-	 * arguments . Also check that the value is in correct range
-	 */
-	if (strstr(optarg, "0x") || strstr(optarg, "0X"))
-		index = (int)strtol(optarg, NULL, 0);
-	else
-		index = atoi(optarg);
-
-	if ((index == 0 && strcmp(optarg, "0")) || index < 0) {
+	index = (int)strtol(optarg, &endptr, 0);
+	if (errno != 0 || *endptr != '\0' || index < 0) {
 		print_error("Invalid argument for index");
 		goto out;
 	}
@@ -341,16 +337,17 @@ out:
 static int verify_offset(struct tool_options *options)
 {
 	int offset = INVALID;
+	char *endptr;
+
+	errno = 0;
 
 	if (options->offset != INVALID) {
 		print_error("duplicated offset option");
 		goto out;
 	}
-	if (strstr(optarg, "0x") || strstr(optarg, "0X"))
-		offset = (int)strtol(optarg, NULL, 0);
-	else
-		offset = atoi(optarg);
-	if ((offset == 0 && strcmp(optarg, "0")) || offset < 0) {
+
+	offset = (int)strtol(optarg, &endptr, 0);
+	if (errno != 0 || *endptr != '\0' || offset < 0) {
 		print_error("Invalid argument for offset");
 		goto out;
 	}
@@ -799,7 +796,7 @@ static int verify_write(struct tool_options *options)
 		if (!options->data)
 			goto out_mem_problem;
 
-		*(__u32 *)options->data = strtol(optarg, &endptr, 16);
+		*(__u32 *)options->data = strtol(optarg, &endptr, 0);
 
 		if (errno != 0 || *endptr != '\0') {
 			print_error("Wrong data");

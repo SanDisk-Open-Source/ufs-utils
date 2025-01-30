@@ -579,8 +579,7 @@ const char *help_str =
 	"		1:	PHY-Adapter Attributes\n"
 	"		2:	DME Attributes for QoS\n\n"
 	"	-a	Read all gettable attributes of peer & local with\n"
-	"		GenSelectorIndex = 0, please use -t to specify Unipro\n"
-	"		attributes idn\n\n"
+	"		GenSelectorIndex = 0\n\n"
 	"	-r	Read single attribute of peer & local, please use -i\n"
 	"		to specify attribute ID, and -t for associated idn\n\n"
 	"	-w data <peer|local>\n"
@@ -590,20 +589,20 @@ const char *help_str =
 	"		  --peer  : access to a peer device (UFS device)\n"
 	"		  --local : access to a local device (UFS host)\n\n"
 	"	-i ID\n"
-	"		Set attribute ID to read/write\n"
-	"	-s GenSelectorIndex \n"
-	"	-p bsg\n"
-	"		Path to ufs-bsg device\n\n"
+	"		Set attribute ID to read/write\n\n"
+	"	-s GenSelectorIndex\n\n"
+	"	-p Path to ufs-bsg device\n\n"
 	"	--static set type to static\n"
 	"		Set attribute type to static \n"
 	"  Note :\n"
 	"	As for the format of the data inputted, hex number should be\n"
 	"	prefixed by 0x/0X\n"
-	"  Eg :\n"
+	"  E.g.:\n"
 	"	1. Set local PA_TxTrailingClocks:\n"
 	"	%s uic -t 1 -w 0x44 -i 0x1564 --local -p /dev/ufs-bsg\n"
 	"	2. Read peer and local PA_TxTrailingClocks:\n"
 	"	%s uic -t 1 -r -i 0x1564 -p /dev/ufs-bsg\n";
+
 void unipro_help(char *tool_name)
 {
 	printf(help_str, tool_name, tool_name, tool_name);
