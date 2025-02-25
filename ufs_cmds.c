@@ -1455,6 +1455,7 @@ static int do_conf_desc(int fd, __u8 opt, __u8 index, char *data_file)
 			}
 			printf("Config Descriptor was written into %s file\n",
 			       data_file);
+			rc = 0;
 		}
 	}
 out:
