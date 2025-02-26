@@ -68,7 +68,8 @@ enum unipro_attr_idn {
 	MPHY = 0x00,
 	PHY_ADAPTER = 0x01,
 	DME_QOS = 0X02,
-	MAX_UNIPRO_IDN,
+	DATA_LINK = 0x03,
+	MAX_UNIPRO_IDN
 };
 
 /* UIC Commands */
