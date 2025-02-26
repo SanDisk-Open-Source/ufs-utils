@@ -165,7 +165,10 @@ struct desc_field_offset device_geo_desc_conf_field_name[] = {
 	{"bDeviceMaxWriteBoosterLUs",		0X53, BYTE},
 	{"bWriteBoosterBufferCapAdjFac",	0X54, BYTE},
 	{"bSupportedWriteBoosterBufferUserSpaceReductionTypes", 0X55, BYTE},
-	{"bSupportedWriteBoosterBufferTypes", 0X56, BYTE}
+	{"bSupportedWriteBoosterBufferTypes", 0X56, BYTE},
+	{"qReservedZUFS1",	0X57, DDWORD},
+	{"qReservedZUFS2",	0X5f, DDWORD},
+	{"bCapAdjFacRepresentation", 0X68, BYTE}
 };
 
 struct desc_field_offset device_interconnect_desc_conf_field_name[] = {
@@ -1568,17 +1571,17 @@ static int check_read_desc_size(__u8 idn, __u8 *data_buf)
 	switch (idn) {
 	case QUERY_DESC_IDN_DEVICE:
 		if ((data_buf[0] != QUERY_DESC_DEVICE_MAX_SIZE) &&
-			(data_buf[0] != QUERY_DESC_DEVICE_MAX_SIZE_3_0))
+		    (data_buf[0] != QUERY_DESC_DEVICE_MAX_SIZE_3_0))
 			unoff = true;
 		break;
 	case QUERY_DESC_IDN_CONFIGURAION:
 		if ((data_buf[0] != QUERY_DESC_CONFIGURAION_MAX_SIZE) &&
-			(data_buf[0] != QUERY_DESC_CONFIGURAION_MAX_SIZE_3_0))
+		    (data_buf[0] != QUERY_DESC_CONFIGURAION_MAX_SIZE_3_0))
 			unoff = true;
 		break;
 	case QUERY_DESC_IDN_UNIT:
 		if ((data_buf[0] != QUERY_DESC_UNIT_MAX_SIZE) &&
-			(data_buf[0] != QUERY_DESC_UNIT_MAX_SIZE_3_0))
+		    (data_buf[0] != QUERY_DESC_UNIT_MAX_SIZE_3_0))
 			unoff = true;
 		break;
 	case QUERY_DESC_IDN_INTERCONNECT:
@@ -1587,7 +1590,8 @@ static int check_read_desc_size(__u8 idn, __u8 *data_buf)
 		break;
 	case QUERY_DESC_IDN_GEOMETRY:
 		if ((data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE) &&
-			(data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE_3_0))
+		    (data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE_3_0) &&
+		    (data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE_4_1))
 			unoff = true;
 		break;
 	case QUERY_DESC_IDN_POWER:
@@ -1596,7 +1600,7 @@ static int check_read_desc_size(__u8 idn, __u8 *data_buf)
 		break;
 	case QUERY_DESC_IDN_HEALTH:
 		if ((data_buf[0] != QUERY_DESC_HEALTH_MAX_SIZE) &&
-			(data_buf[0] != QUERY_DESC_HEALTH_MAX_SIZE_2_1))
+		    (data_buf[0] != QUERY_DESC_HEALTH_MAX_SIZE_2_1))
 			unoff = true;
 	break;
 	case QUERY_DESC_IDN_FBO:
