@@ -21,6 +21,40 @@
 #include "ufs.h"
 #include "unipro.h"
 
+/*Data Link Layer(L2) */
+static struct ufs_uic_attr_fields data_lunk_attrs[] = {
+	/* Data Link (gettable, settable) Attributes */
+	{"DL_TC0TXFCThreshold", 0x2040, (GETTABLE | SETTABLE)},
+	{"DL_FC0ProtectionTimeOutVal", 0x2041, (GETTABLE | SETTABLE)},
+	{"DL_TC0ReplayTimeOutVal", 0x2042, (GETTABLE | SETTABLE)},
+	{"DL_AFC0ReqTimeOutVal", 0x2043, (GETTABLE | SETTABLE)},
+	{"DL_AFC0CreditThreshold", 0x2044, (GETTABLE | SETTABLE)},
+	{"DL_TC0OutAckThreshold", 0x2045, (GETTABLE | SETTABLE)},
+	{"DL_TC1TXFCThreshold", 0x2060, (GETTABLE | SETTABLE)},
+	{"DL_FC1ProtectionTimeOutVal", 0x2061, (GETTABLE | SETTABLE)},
+	{"DL_TC1ReplayTimeOutVal", 0x2062, (GETTABLE | SETTABLE)},
+	{"DL_AFC1ReqTimeOutVal", 0x2063, (GETTABLE | SETTABLE)},
+	{"DL_AFC1CreditThreshold", 0x2064, (GETTABLE | SETTABLE)},
+	{"DL_TC1OutAckThreshold", 0x2065, (GETTABLE | SETTABLE)},
+
+	/* Data Link (gettable, static) Attributes */
+	{"DL_TxPreemptionCap", 0x2000, (GETTABLE | STATIC)},
+	{"DL_MTU", 0x2007, (GETTABLE | STATIC)},
+	{"DL_SYMBOL_MTU", 0x2008, (GETTABLE | STATIC)},
+	{"DL_CreditUnitSize", 0x2009, (GETTABLE | STATIC)},
+	{"DL_TC0TxMaxSDUSize", 0x2001, (GETTABLE | STATIC)},
+	{"DL_TC0RxInitCreditVal", 0x2002, (GETTABLE | STATIC)},
+	{"DL_TC0TxBufferSize", 0x2005, (GETTABLE | STATIC)},
+	{"DL_CreditUnitSize", 0x2009, (GETTABLE | STATIC)},
+	{"DL_PeerTC0Present", 0x2046, (GETTABLE | STATIC)},
+	{"DL_PeerTC0RxInitCreditVal", 0x2047, (GETTABLE | STATIC)},
+	{"DL_TC1TxMaxSDUSize", 0x2003, (GETTABLE | STATIC)},
+	{"DL_TC1RxInitCreditVal", 0x2004, (GETTABLE | STATIC)},
+	{"DL_TC1TxBufferSize", 0x2006, (GETTABLE | STATIC)},
+	{"DL_PeerTC1Present", 0x2066, (GETTABLE | STATIC)},
+	{"DL_PeerTC1RxInitCreditVal", 0x2067, (GETTABLE | STATIC)}
+};
+
 /*PHY Adapter Layer(L1.5) */
 static struct ufs_uic_attr_fields phy_adapter_attrs[] = {
 	/*  PHY Adapter (gettable, settable) Common Attributes */
@@ -267,6 +301,10 @@ static struct ufs_unipro_attrs_info uic_attrs_group[MAX_UNIPRO_IDN] = {
 	{
 		"DME Attributes for QoS", dme_qos_attrs,
 		sizeof(dme_qos_attrs) / sizeof(struct ufs_uic_attr_fields)
+	},
+	{
+		"Data Link", data_lunk_attrs,
+		sizeof(data_lunk_attrs) / sizeof(struct ufs_uic_attr_fields)
 	},
 };
 
@@ -577,7 +615,8 @@ const char *help_str =
 	"		Supported Unipro layers attributes idn as below:\n"
 	"		0:	MIPI M-PHY Attributes\n"
 	"		1:	PHY-Adapter Attributes\n"
-	"		2:	DME Attributes for QoS\n\n"
+	"		2:	DME Attributes for QoS\n"
+	"		3:	Data Link Attributes\n\n"
 	"	-a	Read all gettable attributes of peer & local with\n"
 	"		GenSelectorIndex = 0\n\n"
 	"	-r	Read single attribute of peer & local, please use -i\n"
