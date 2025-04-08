@@ -1949,15 +1949,26 @@ static int read_single_attr(int fd, struct tool_options *opt, __u8 idn,
 			    struct ufs_bsg_reply *bsg_rsp)
 {
 	int rc = OK;
-	__u32 attr_value;
+	struct utp_upiu_query_v4_0 *upiu_resp_v4_0;
+	__u32 attr_value_u32;
 	struct attr_fields *attr = 0;
+	__u64 attr_value_u64;
+	__u8 *output_attr_value;
+
 
 	rc = do_query_rq(fd, bsg_req, bsg_rsp,
 			UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
 			UPIU_QUERY_OPCODE_READ_ATTR, idn,
 			opt->index, opt->selector, 0, 0, 0);
 	if (rc == OK) {
-		attr_value = be32toh(bsg_rsp->upiu_rsp.qr.value);
+		if (idn == QUERY_ATTR_IDN_DEVICE_LEVEL_EXT_ID) {
+			upiu_resp_v4_0 = (struct utp_upiu_query_v4_0 *)&bsg_rsp->upiu_rsp;
+			attr_value_u64 = be64toh(upiu_resp_v4_0->osf3);
+			output_attr_value = (__u8 *)&attr_value_u64;
+		} else {
+			attr_value_u32 = be32toh(bsg_rsp->upiu_rsp.qr.value);
+			output_attr_value = (__u8 *)&attr_value_u32;
+		}
 		/*
 		 * Some vendors is using the reserved or not Jedec spec
 		 * attributes. Therefore read the attribute in any case
@@ -1966,7 +1977,7 @@ static int read_single_attr(int fd, struct tool_options *opt, __u8 idn,
 		    ufs_attrs[idn].acc_type != ACC_INVALID)
 			attr = &ufs_attrs[idn];
 
-		print_attribute(attr, (__u8 *)&attr_value);
+		print_attribute(attr, output_attr_value);
 	}
 
 	return rc;
