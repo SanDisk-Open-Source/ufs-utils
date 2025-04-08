@@ -1944,6 +1944,34 @@ int do_read_desc(int fd, struct ufs_bsg_request *bsg_req,
 	return rc;
 }
 
+static int read_single_attr(int fd, struct tool_options *opt, __u8 idn,
+			    struct ufs_bsg_request *bsg_req,
+			    struct ufs_bsg_reply *bsg_rsp)
+{
+	int rc = OK;
+	__u32 attr_value;
+	struct attr_fields *attr = 0;
+
+	rc = do_query_rq(fd, bsg_req, bsg_rsp,
+			UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
+			UPIU_QUERY_OPCODE_READ_ATTR, idn,
+			opt->index, opt->selector, 0, 0, 0);
+	if (rc == OK) {
+		attr_value = be32toh(bsg_rsp->upiu_rsp.qr.value);
+		/*
+		 * Some vendors is using the reserved or not Jedec spec
+		 * attributes. Therefore read the attribute in any case
+		 * */
+		if (idn <= ARRAY_SIZE(ufs_attrs) &&
+		    ufs_attrs[idn].acc_type != ACC_INVALID)
+			attr = &ufs_attrs[idn];
+
+		print_attribute(attr, (__u8 *)&attr_value);
+	}
+
+	return rc;
+}
+
 int do_attributes(struct tool_options *opt)
 {
 	int fd;
@@ -1976,15 +2004,8 @@ int do_attributes(struct tool_options *opt)
 				att_idn++;
 				continue;
 			}
-
-			rc = do_query_rq(fd, &bsg_req, &bsg_rsp,
-					UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
-					UPIU_QUERY_OPCODE_READ_ATTR, att_idn,
-					opt->index, opt->selector, 0, 0, 0);
-			if (rc == OK) {
-				attr_value = be32toh(bsg_rsp.upiu_rsp.qr.value);
-				print_attribute(tmp, (__u8 *)&attr_value);
-			}
+			rc = read_single_attr(fd, opt, att_idn, &bsg_req,
+					      &bsg_rsp);
 
 			memset(&bsg_rsp, 0, BSG_REPLY_SZ);
 			att_idn++;
@@ -2033,22 +2054,41 @@ skip_width_check:
 			print_error("The attribute is write only");
 			goto out;
 		}
-
-		rc = do_query_rq(fd, &bsg_req, &bsg_rsp,
-				UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
-				UPIU_QUERY_OPCODE_READ_ATTR, opt->idn,
-				opt->index, opt->selector, 0, 0, 0);
-		if (rc == OK) {
-			attr_value = be32toh(bsg_rsp.upiu_rsp.qr.value);
-			if (opt->idn > ARRAY_SIZE(ufs_attrs) ||
-			    tmp->acc_type == ACC_INVALID)
-				tmp = 0;
-			else
-				print_attribute(tmp, (__u8 *)&attr_value);
-		}
+		rc = read_single_attr(fd, opt, opt->idn, &bsg_req, &bsg_rsp);
 	}
 out:
 	close(fd);
+	return rc;
+}
+
+static int read_single_flag(int fd, struct tool_options *opt, __u8 idn,
+			    struct ufs_bsg_request *bsg_req,
+			    struct ufs_bsg_reply *bsg_rsp)
+{
+	int rc = OK;
+	__u8 flag_value;
+	struct flag_fields *flag;
+	char *flag_name = 0;
+
+	rc = do_query_rq(fd, bsg_req, bsg_rsp,
+			 UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
+			 UPIU_QUERY_OPCODE_READ_FLAG, idn,
+			 opt->index, opt->selector, 0, 0, 0);
+	if (rc == OK) {
+		flag_value = be32toh(bsg_rsp->upiu_rsp.qr.value) & 0xff;
+		/*
+		 * Some vendors is using the reserved or not Jedec spec
+		 * flags. Therefore read the flag in any case
+		 * */
+		if (opt->idn >= ARRAY_SIZE(ufs_flags) ||
+		    ufs_flags[idn].acc_type != ACC_INVALID) {
+			flag = &ufs_flags[idn];
+			flag_name = flag->name;
+		}
+
+		print_flag(flag_name, flag_value);
+	}
+
 	return rc;
 }
 
@@ -2056,7 +2096,7 @@ int do_flags(struct tool_options *opt)
 {
 	int fd;
 	int rc = OK;
-	__u8 opcode, flag_idn, value;
+	__u8 opcode, flag_idn;
 	struct flag_fields *tmp;
 	struct ufs_bsg_request bsg_req = {0};
 	struct ufs_bsg_reply bsg_rsp = {0};
@@ -2085,16 +2125,8 @@ int do_flags(struct tool_options *opt)
 				flag_idn++;
 				continue;
 			}
-
-			rc = do_query_rq(fd, &bsg_req, &bsg_rsp,
-					UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
-					UPIU_QUERY_OPCODE_READ_FLAG, flag_idn,
-					opt->index, opt->selector, 0, 0, 0);
-			if (rc == OK) {
-				value = be32toh(bsg_rsp.upiu_rsp.qr.value) &
-						0xff;
-				print_flag(tmp->name, value);
-			}
+			rc = read_single_flag(fd, opt, flag_idn, &bsg_req,
+					      &bsg_rsp);
 
 			memset(&bsg_rsp, 0, BSG_REPLY_SZ);
 			flag_idn++;
@@ -2122,21 +2154,7 @@ int do_flags(struct tool_options *opt)
 			print_error("The flag is write only");
 			goto out;
 		}
-
-		rc = do_query_rq(fd, &bsg_req, &bsg_rsp,
-				 UPIU_QUERY_FUNC_STANDARD_READ_REQUEST,
-				 UPIU_QUERY_OPCODE_READ_FLAG, opt->idn,
-				 opt->index, opt->selector, 0, 0, 0);
-		if (rc == OK) {
-			value = be32toh(bsg_rsp.upiu_rsp.qr.value) & 0xff;
-			if (opt->idn < ARRAY_SIZE(ufs_flags))
-				print_flag(tmp->name, value);
-			else
-				print_flag("Flag value", value);
-		} else {
-			print_error("Read for flag %d failed", opt->idn);
-		}
-
+		rc = read_single_flag(fd, opt, opt->idn, &bsg_req, &bsg_rsp);
 	break;
 	default:
 		print_error("Unsupported operation for %s flag", tmp->name);
