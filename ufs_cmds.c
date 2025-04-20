@@ -1094,6 +1094,7 @@ static int store_data_file(char *data_file, __u8 *buf, size_t buf_size)
 
 	rc = write(data_fd, buf, buf_size);
 
+	close(data_fd);
 	return rc;
 }
 
