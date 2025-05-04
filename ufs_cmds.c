@@ -817,7 +817,7 @@ static int do_string_desc(int fd, char *str_data, __u8 idn, __u8 opr,
 			  __u8 index, char *data_file);
 static int do_write_desc(int fd, struct ufs_bsg_request *bsg_req,
 			 struct ufs_bsg_reply *bsg_rsp, __u8 idn, __u8 index,
-			 __u16 desc_buf_len, __u8 *data_buf);
+			 char *data_buf);
 static void query_response_error(__u8 opcode, __u8 idn);
 static int find_bsg_device(char *path, int *counter);
 
@@ -1341,19 +1341,16 @@ static int do_string_desc(int fd, char *str_data, __u8 idn, __u8 opr,
 	__u8 data_buf[QUERY_DESC_STRING_MAX_SIZE] = {0};
 	struct ufs_bsg_request bsg_req = {0};
 	struct ufs_bsg_reply bsg_rsp = {0};
-	int len, i;
+	int i;
 
 	if (opr == WRITE) {
-		len = strlen(str_data);
-		create_str_desc_data(data_buf, str_data, len);
 		rc = do_write_desc(fd, &bsg_req, &bsg_rsp,
-				QUERY_DESC_IDN_STRING, index,
-				len * 2 + 2, data_buf);
+				   QUERY_DESC_IDN_STRING, index, str_data);
 		if (rc == OK)
 			printf("\nString Descriptor was written\n");
 	} else {
 		rc = do_read_desc(fd, &bsg_req, &bsg_rsp, QUERY_DESC_IDN_STRING,
-				index, QUERY_DESC_STRING_MAX_SIZE, data_buf);
+				  index, QUERY_DESC_STRING_MAX_SIZE, data_buf);
 		if (!rc) {
 			printf("\nString Desc(Row data):\n");
 			for (i = 0; i < bsg_rsp.reply_payload_rcv_len; i++)
@@ -1379,7 +1376,6 @@ out:
 static int do_conf_desc(int fd, __u8 opt, __u8 index, char *data_file)
 {
 	int rc = OK;
-	int file_size;
 	struct ufs_bsg_request bsg_req = {0};
 	struct ufs_bsg_reply bsg_rsp = {0};
 	__u8 conf_desc_buf[QUERY_DESC_MAX_SIZE] = {0};
@@ -1387,31 +1383,9 @@ static int do_conf_desc(int fd, __u8 opt, __u8 index, char *data_file)
 	int data_fd = INVALID;
 
 	if (opt == WRITE) {
-		data_fd = open(data_file, O_RDONLY);
-		if (data_fd < 0) {
-			perror("can't open input file");
-			return ERROR;
-		}
-
-		file_size = lseek(data_fd, 0, SEEK_END);
-		if (file_size <= 0) {
-			print_error("Wrong config file");
-			rc = ERROR;
-			goto out;
-		}
-		lseek(data_fd, 0, SEEK_SET);
-
-		rc = read(data_fd, conf_desc_buf, file_size);
-		if (rc <= 0) {
-			print_error("Cannot config file");
-			rc = ERROR;
-			goto out;
-		}
-
 		rc = do_write_desc(fd, &bsg_req, &bsg_rsp,
-				QUERY_DESC_IDN_CONFIGURAION, index,
-				file_size,
-				conf_desc_buf);
+				   QUERY_DESC_IDN_CONFIGURAION, index,
+				   data_file);
 		if (!rc)
 			printf("Config Descriptor was written to device\n");
 	} else {
@@ -1490,34 +1464,41 @@ out:
 	return rc;
 }
 
-int do_vendor_desc(int fd, __u8 idn, char *data_file)
+int do_vendor_desc(int fd, __u8 opt, __u8 idn, char *data_file)
 {
 	struct ufs_bsg_request bsg_req = {0};
 	struct ufs_bsg_reply bsg_rsp = {0};
 	__u8 data_buf[QUERY_DESC_MAX_SIZE] = {0};
 	int rc = 0;
 
-	rc = do_read_desc(fd, &bsg_req, &bsg_rsp,
-			  idn, 0, QUERY_DESC_MAX_SIZE, data_buf);
-	if (rc) {
-		if (rc == ERROR)
-			print_error("Could not read the descriptor");
-		goto out;
-	}
-
-	gl_pr_type = RAW_VALUE;
-	print_descriptors("Reserved/Vendor Descriptor", data_buf, 0,
-			   data_buf[0]);
-
-	if (data_file) {
-		rc = store_data_file(data_file, data_buf, data_buf[0]);
-		if (rc < 0) {
-			print_error("Could not write string desc data");
-			rc = ERROR;
+	if (opt == WRITE) {
+		rc = do_write_desc(fd, &bsg_req, &bsg_rsp,
+				   idn, 0, data_file);
+		if (!rc)
+			printf("Descriptor was written to device\n");
+	} else {
+		rc = do_read_desc(fd, &bsg_req, &bsg_rsp,
+				  idn, 0, QUERY_DESC_MAX_SIZE, data_buf);
+		if (rc) {
+			if (rc == ERROR)
+				print_error("Could not read the descriptor");
 			goto out;
 		}
-		printf("Reserved/Vendor Descriptor was written into %s file\n",
-		       data_file);
+
+		gl_pr_type = RAW_VALUE;
+		print_descriptors("Reserved/Vendor Descriptor", data_buf, 0,
+				   data_buf[0]);
+
+		if (data_file) {
+			rc = store_data_file(data_file, data_buf, data_buf[0]);
+			if (rc < 0) {
+				print_error("Failed to store desc data");
+				rc = ERROR;
+				goto out;
+			}
+			printf("Reserved/Vendor Descriptor was written into %s file\n",
+			       data_file);
+		}
 	}
 
 out:
@@ -1556,13 +1537,57 @@ static int find_bsg_device(char* path, int *counter) {
 }
 
 static int do_write_desc(int fd, struct ufs_bsg_request *bsg_req,
-			struct ufs_bsg_reply *bsg_rsp, __u8 idn, __u8 index,
-			__u16 desc_buf_len, __u8 *data_buf)
+			 struct ufs_bsg_reply *bsg_rsp, __u8 idn, __u8 index,
+			 char *data)
 {
+	int rc = OK;
+	int data_fd = INVALID;
+	int size;
+	__u8 write_buf[QUERY_DESC_MAX_SIZE] = {0};
+
+	if (!data) {
+		print_error("No data provided for write descriptor");
+		return ERROR;
+	}
+
+	if (idn == QUERY_DESC_IDN_STRING) {
+		int len = 0;
+
+		len = strlen(data);
+		create_str_desc_data(write_buf, data, len);
+		size = len * 2 + 2;
+
+	} else {
+		data_fd = open(data, O_RDONLY);
+		if (data_fd < 0) {
+			perror("can't open input file");
+			return ERROR;
+		}
+
+		size = lseek(data_fd, 0, SEEK_END);
+		if (size <= 0) {
+			print_error("Wrong config file");
+			rc = ERROR;
+			goto out;
+		}
+		lseek(data_fd, 0, SEEK_SET);
+
+		rc = read(data_fd, write_buf, size);
+		if (rc <= 0) {
+			print_error("Cannot read data file");
+			rc = ERROR;
+			goto out;
+		}
+	}
 	return do_query_rq(fd, bsg_req, bsg_rsp,
-			UPIU_QUERY_FUNC_STANDARD_WRITE_REQUEST,
-			UPIU_QUERY_OPCODE_WRITE_DESC, idn, index,
-			0, desc_buf_len, 0, data_buf);
+			   UPIU_QUERY_FUNC_STANDARD_WRITE_REQUEST,
+			   UPIU_QUERY_OPCODE_WRITE_DESC, idn, index,
+			   0, size, 0, write_buf);
+	out:
+	if (data_fd != INVALID)
+		close(data_fd);
+
+	return rc;
 }
 
 static int check_read_desc_size(__u8 idn, __u8 *data_buf)
@@ -1830,7 +1855,7 @@ int do_desc(struct tool_options *opt)
 			print_error("Unsupported Descriptor type %d", opt->idn);
 			rc = -EINVAL;
 		} else {
-			rc = do_vendor_desc(fd, opt->idn, opt->data);
+			rc = do_vendor_desc(fd, opt->opr, opt->idn, opt->data);
 		}
 		break;
 	}
