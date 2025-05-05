@@ -765,13 +765,6 @@ static int verify_write(struct tool_options *options)
 		int arg_len = strlen(optarg);
 		int str_desc_max_len = QUERY_DESC_STRING_MAX_SIZE/2 - 2;
 
-		if (options->idn != QUERY_DESC_IDN_CONFIGURAION &&
-			options->idn != QUERY_DESC_IDN_STRING) {
-			print_error("write unavailable for descriptor = %d",
-				options->idn);
-			goto out;
-		}
-
 		if (arg_len > str_desc_max_len) {
 			print_error("Input data is too big");
 			goto out;
