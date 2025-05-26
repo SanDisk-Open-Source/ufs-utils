@@ -311,19 +311,18 @@ out:
 static int verify_length(struct tool_options *options)
 {
 	int len = INVALID;
+	char *endptr;
+
+	errno = 0;
 
 	if (options->len != INVALID) {
 		print_error("duplicated length option");
 		goto out;
 	}
 
-	/* In case atoi returned 0. Check that is real 0 and not error
-	 * arguments. Also check that the value is in correct range
-	 */
-	len = atoi(optarg);
-	if (len == 0 || len < 0 || len > BLOCK_SIZE) {
-		print_error("Invalid argument for length. The value should be between 1 to %dB",
-				BLOCK_SIZE);
+	len = (int)strtol(optarg, &endptr, 0);
+	if (errno != 0 || *endptr != '\0' || len < 0) {
+		print_error("Invalid argument for length.");
 		goto out;
 	}
 
@@ -765,13 +764,6 @@ static int verify_write(struct tool_options *options)
 	if (options->config_type_inx == DESC_TYPE) {
 		int arg_len = strlen(optarg);
 		int str_desc_max_len = QUERY_DESC_STRING_MAX_SIZE/2 - 2;
-
-		if (options->idn != QUERY_DESC_IDN_CONFIGURAION &&
-			options->idn != QUERY_DESC_IDN_STRING) {
-			print_error("write unavailable for descriptor = %d",
-				options->idn);
-			goto out;
-		}
 
 		if (arg_len > str_desc_max_len) {
 			print_error("Input data is too big");

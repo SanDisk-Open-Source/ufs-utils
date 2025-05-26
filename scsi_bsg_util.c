@@ -393,10 +393,7 @@ int send_bsg_scsi_trs(int fd, void *request_buff, void *reply_buff, __u32 req_bu
 		ret = -EINVAL;
 	}
 
-	write_file_with_counter("bsg_rsp_%d.bin", reply_buff,
-			BSG_REPLY_SZ);
+	write_file_with_counter("bsg_rsp_%d.bin", reply_buff, BSG_REPLY_SZ);
 
-	WRITE_LOG("%s res_len %d\n", __func__,
-		reply_buff->reply_payload_rcv_len);
 	return ret;
 }
