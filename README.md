@@ -79,8 +79,8 @@ Output:
                 ufs-utils fl -t 4 -p /dev/ufs-bsg
 
 ## Authors ##
-signed-off-by:Arthur Simchaev (arthur.simchaev@wdc.com)
-signed-off-by:Avri Altman (avri.altman@wdc.com)
+signed-off-by:Arthur Simchaev (arthur.simchaev@sandisk.com)
+signed-off-by:Avri Altman (avri.altman@sandisk.com)
 
 ## License ##
 This project is licensed under the GPL-2.0-only  
