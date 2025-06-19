@@ -161,7 +161,11 @@ enum ufs_desc_max_size {
 	QUERY_DESC_INTERCONNECT_MAX_SIZE	= 0x06,
 	QUERY_DESC_POWER_MAX_SIZE		= 0x62,
 	QUERY_DESC_HEALTH_MAX_SIZE		= 0x2d,
-	QUERY_DESC_FBO_MAX_SIZE			= 0x12
+	QUERY_DESC_FBO_MAX_SIZE			= 0x12,
+
+	/* Max desciptor size from 2.1 to 3.0 MX Vendor UFS spec */
+	QUERY_DESC_DEVICE_MAX_SIZE_VENDOR_SS_MX         = 0x5F,
+	QUERY_DESC_GEOMETRY_MAX_SIZE_VENDOR_SS_MX       = 0x59
 };
 
 /* UPIU Read/Write flags */
