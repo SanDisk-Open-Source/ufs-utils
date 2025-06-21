@@ -1598,6 +1598,7 @@ static int check_read_desc_size(__u8 idn, __u8 *data_buf)
 	switch (idn) {
 	case QUERY_DESC_IDN_DEVICE:
 		if ((data_buf[0] != QUERY_DESC_DEVICE_MAX_SIZE) &&
+		    (data_buf[0] != QUERY_DESC_DEVICE_MAX_SIZE_VENDOR_SS_MX) &&
 		    (data_buf[0] != QUERY_DESC_DEVICE_MAX_SIZE_3_0))
 			unoff = true;
 		break;
@@ -1617,6 +1618,7 @@ static int check_read_desc_size(__u8 idn, __u8 *data_buf)
 		break;
 	case QUERY_DESC_IDN_GEOMETRY:
 		if ((data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE) &&
+		    (data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE_VENDOR_SS_MX) &&
 		    (data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE_3_0) &&
 		    (data_buf[0] != QUERY_DESC_GEOMETRY_MAX_SIZE_4_1))
 			unoff = true;
