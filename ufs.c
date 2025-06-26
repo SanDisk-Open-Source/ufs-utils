@@ -20,6 +20,7 @@
 #include "ufs_vendor.h"
 #include "ufs_rpmb.h"
 #include "ufs_hmr.h"
+#include "ufs_emon.h"
 
 #define UFS_BSG_UTIL_VERSION	"6.14.11"
 
@@ -47,6 +48,7 @@ static struct tool_command commands[] = {
 	{ do_hmr, "hmr", HMR_TYPE},
 	{ do_get_ufs_spec_ver, "spec_version", SPEC_VERSION},
 	{ do_get_ufs_bsg_list, "list_bsg", BSG_LIST_TYPE},
+	{ do_emon, "emon", EMON_TYPE},
 	{ 0, 0, 0}
 };
 
@@ -223,6 +225,9 @@ void print_command_help(char *prgname, int config_type)
 		break;
 	case BSG_LIST_TYPE:
 		ufs_bsg_list_help(prgname);
+		break;
+	case EMON_TYPE:
+		ufs_emon_help(prgname);
 		break;
 	default:
 		print_error("Unsupported cmd type");

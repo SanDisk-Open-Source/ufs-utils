@@ -54,6 +54,9 @@ struct tool_options {
 	/*RPMB region*/
 	int8_t region;
 	int sg_type;
+	int test_count;
+	int max_vol;
+	int max_time;
 	char keypath[PATH_MAX];
 	char path[PATH_MAX];
 };

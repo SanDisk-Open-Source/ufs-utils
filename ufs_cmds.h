@@ -6,6 +6,9 @@
 
 #include "options.h"
 #include <asm/types.h>
+#include <linux/types.h>
+
+#include "scsi_bsg_util.h"
 
 
 enum field_width {
@@ -72,4 +75,8 @@ void attribute_help(char *tool_name);
 void flag_help(char *tool_name);
 void ufs_spec_ver_help(char *tool_name);
 void ufs_bsg_list_help(char *tool_name);
+int do_read_desc(int fd, struct ufs_bsg_request *bsg_req,
+		 struct ufs_bsg_reply *bsg_rsp, __u8 idn, __u8 index,
+		 __u16 desc_buf_len, __u8 *data_buf);
+
 #endif /* UFS_CMNDS_H_ */

@@ -322,7 +322,7 @@ static struct uic_cmd_result_code resultcode[] = {
 	{10, "DME_FAILURE"},
 };
 
-static int ufshcd_dme_get_attr(int fd, __u32 attr_sel, __u8 peer)
+int ufshcd_dme_get_attr(int fd, __u32 attr_sel, __u8 peer)
 {
 	int retries = UFS_UIC_COMMAND_RETRIES;
 	struct ufs_bsg_request bsg_req = { 0 };
@@ -380,7 +380,7 @@ out:
 	return rt;
 }
 
-static int ufshcd_dme_set_attr(int fd, __u32 attr_sel, __u8 attr_set,
+int ufshcd_dme_set_attr(int fd, __u32 attr_sel, __u8 attr_set,
 			       __u32 mib_val, __u8 peer)
 {
 	int retries = UFS_UIC_COMMAND_RETRIES;

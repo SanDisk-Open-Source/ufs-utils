@@ -189,7 +189,8 @@ enum ufs_cong_type {
 	ARPMB_CMD_TYPE,
 	HMR_TYPE,
 	SPEC_VERSION,
-	BSG_LIST_TYPE
+	BSG_LIST_TYPE,
+	EMON_TYPE
 };
 
 /* UTP UPIU Transaction Codes Initiator to Target */
