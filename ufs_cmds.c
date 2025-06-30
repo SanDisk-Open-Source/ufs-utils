@@ -821,10 +821,6 @@ static int do_write_desc(int fd, struct ufs_bsg_request *bsg_req,
 static void query_response_error(__u8 opcode, __u8 idn);
 static int find_bsg_device(char *path, int *counter);
 
-int do_read_desc(int fd, struct ufs_bsg_request *bsg_req,
-		 struct ufs_bsg_reply *bsg_rsp, __u8 idn, __u8 index,
-		 __u16 desc_buf_len, __u8 *data_buf);
-
 int do_query_rq(int fd, struct ufs_bsg_request *bsg_req,
 		struct ufs_bsg_reply *bsg_rsp, __u8 query_req_func,
 		__u8 opcode, __u8 idn, __u8 index, __u8 sel,

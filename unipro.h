@@ -91,5 +91,8 @@ enum uic_cmd_dme {
 
 int do_uic(struct tool_options *opt);
 void unipro_help(char *tool_name);
+int ufshcd_dme_get_attr(int fd, __u32 attr_sel, __u8 peer);
+int ufshcd_dme_set_attr(int fd, __u32 attr_sel, __u8 attr_set, __u32 mib_val,
+			__u8 peer);
 
 #endif	/* END UNIPRO_H_ */

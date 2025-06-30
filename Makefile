@@ -3,7 +3,7 @@
 
 export CC := $(CROSS_COMPILE)gcc
 AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2
-CFLAGS ?= -g -O2 -static
+CFLAGS ?= -g -O2 -static -D_GNU_SOURCE
 
 ifneq ($(CROSS_COMPILE),)
 	LDFLAGS += -static
@@ -24,9 +24,10 @@ objects = \
 	sha2.o \
 	ufs_rpmb.o \
 	ufs_arpmb.o \
-	ufs_hmr.o
+	ufs_hmr.o \
+	ufs_emon.o \
 
-CHECKFLAGS = -Wall  -Wundef -Wno-missing-braces
+CHECKFLAGS = -Wall  -Wundef -Wno-missing-braces -fcommon
 
 DEPFLAGS = -Wp,-MMD,$(@D)/.$(@F).d,-MT,$@
 override CFLAGS := $(CHECKFLAGS) $(AM_CFLAGS) $(CFLAGS) $(INC_DIR) $(CXXFLAGS)
