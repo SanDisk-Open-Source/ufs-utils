@@ -13,7 +13,7 @@ e) FFU - Field Firmware Update
 f) Send Vendor commands based on SCSI WRITE/READ Buffer commands   
 g) RPMB functionality     
   
-The tool is aligned to the UFS 4.0 spec.   
+The tool is aligned to the UFS 4.1 spec.   
 
 ## Build: ##
 ### Set CROSS\_COMPILE variable(e.g.): ###
