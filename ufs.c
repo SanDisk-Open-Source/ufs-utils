@@ -22,7 +22,7 @@
 #include "ufs_hmr.h"
 #include "ufs_emon.h"
 
-#define UFS_BSG_UTIL_VERSION	"7.14.11"
+#define UFS_BSG_UTIL_VERSION	"7.14.12"
 
 typedef int (*command_function)(struct tool_options *opt);
 
