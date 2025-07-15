@@ -1100,7 +1100,7 @@ int do_hmr(struct tool_options *opt)
 	__u32 refresh_totcount;
 	enum hmr_stage_skip stage_passer = 0;
 
-	if (!opt || !opt->path)
+	if (!opt)
 		return -EHMR_INVAL;
 
 	/* Open dev in subject */
