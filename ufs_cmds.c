@@ -1520,7 +1520,7 @@ static int find_bsg_device(char* path, int *counter) {
 			if ((strcmp(files->d_name, ".") != 0) &&
 			    (strcmp(files->d_name, "..") != 0)) {
 				char *full_path = (char *)malloc(strlen(path) +
-						   strlen(files->d_name) + 1);
+						   strlen(files->d_name) + 2);
 				sprintf(full_path, "%s/%s",
 					path, files->d_name);
 				rc = find_bsg_device(full_path, counter);
