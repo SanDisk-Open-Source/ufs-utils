@@ -110,7 +110,7 @@ void vendor_help(char *tool_name)
 		tool_name);
 	printf("\n\t-r\tRead vendor buffer command[default operation]\n");
 	printf("\n\t-w\tInput file path for write buffer vendor command\n");
-	printf("\n\t-L\tData buffer length, up to 512 Bytes[default value 512B]\n");
+	printf("\n\t-L\tData buffer length [default value 512B]\n");
 	printf("\n\t-i\tBuffer ID\n");
 	printf("\n\t-g\t sg struct ver - 0: SG_IO_VER3 (default), 1: SG_IO_VER4\n");
 	printf("\n\t-O\tBuffer Offset\n");
