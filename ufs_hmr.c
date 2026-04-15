@@ -17,18 +17,6 @@
 #include "ufs_cmds.h"
 
 /*
- * HMR Quirks: 1 - enable, 0 - disable
- */
-
-/*
- * Big-little-endian byte order: some params
- * may occur in order other than expected.
- * Change byte order for the following params.
- */
-#define HMR_QUIRK_REFRESH_TOTCOUNT_BYTE_ORDER	1
-#define HMR_QUIRK_REFRESH_PROGRESS_BYTE_ORDER	1
-
-/*
  * There is the maximum number of HMR operations in the life
  * of the device. Having reached this number, the device will
  * return "General Failure" and set the bRefreshStatus attribute
@@ -487,10 +475,7 @@ static int hmr_progress_read(__u32 *result,
 
 	layout = desc->layout;
 
-	if (!HMR_QUIRK_REFRESH_PROGRESS_BYTE_ORDER)
-		*result = be32toh(layout->refresh_progress);
-	else
-		*result = layout->refresh_progress;
+	*result = be32toh(layout->refresh_progress);
 
 	return rc;
 
@@ -574,10 +559,7 @@ static inline int hmr_precondition_validate_totcount(__u32 *result,
 	if (!result || !layout)
 		return -EHMR_INVAL;
 
-	if (!HMR_QUIRK_REFRESH_TOTCOUNT_BYTE_ORDER)
-		refresh_totcount = be32toh(layout->refresh_total_count);
-	else
-		refresh_totcount = layout->refresh_total_count;
+	refresh_totcount = be32toh(layout->refresh_total_count);
 
 	if (refresh_totcount >= HMR_REFRESH_MAX_TOTCOUNT) {
 		print_error("hmr: precondition: "
@@ -822,10 +804,7 @@ static inline int hmr_postcondition_verify_totcount(__u32 prev_totcount,
 	if (!layout)
 		return -EHMR_INVAL;
 
-	if (!HMR_QUIRK_REFRESH_TOTCOUNT_BYTE_ORDER)
-		result = be32toh(layout->refresh_total_count);
-	else
-		result = layout->refresh_total_count;
+	result = be32toh(layout->refresh_total_count);
 
 	if (result <= prev_totcount) {
 		print_error("hmr: postcondition: "
