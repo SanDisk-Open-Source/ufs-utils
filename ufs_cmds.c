@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include <dirent.h>
 
+#define COMPILE_TIME_ARRAY_SIZE_ASSERT(cond) _Static_assert(cond, "Size mismatch")
+
 #include "ufs.h"
 #include "ufs_cmds.h"
 #include "options.h"
@@ -515,9 +517,10 @@ struct attr_fields ufs_attrs[] = {
 	{ATTR_VENDOR()},
 	{ATTR_VENDOR()},
 	{ATTR_VENDOR()},
-	{ATTR_VENDOR()},
 	{ATTR_VENDOR()}
 };
+
+COMPILE_TIME_ARRAY_SIZE_ASSERT(ARRAY_SIZE(ufs_attrs) == 256);
 
 struct flag_fields ufs_flags[] = {
 	{"Reserved", ACC_INVALID, MODE_INVALID, LEVEL_INVALID},
@@ -775,8 +778,11 @@ struct flag_fields ufs_flags[] = {
 	{FLAG_VENDOR()},
 	{FLAG_VENDOR()},
 	{FLAG_VENDOR()},
+	{FLAG_VENDOR()},
 	{FLAG_VENDOR()}
 };
+
+COMPILE_TIME_ARRAY_SIZE_ASSERT(ARRAY_SIZE(ufs_flags) == 256);
 
 static struct query_err_res query_err_status[] = {
 	{"Success", 0xF0},
@@ -1994,8 +2000,7 @@ static int read_single_attr(int fd, struct tool_options *opt, __u8 idn,
 		 * Some vendors is using the reserved or not Jedec spec
 		 * attributes. Therefore read the attribute in any case
 		 * */
-		if (idn <= ARRAY_SIZE(ufs_attrs) &&
-		    ufs_attrs[idn].acc_type != ACC_INVALID)
+		if (ufs_attrs[idn].acc_type != ACC_INVALID)
 			attr = &ufs_attrs[idn];
 
 		print_attribute(attr, output_attr_value);
@@ -2127,8 +2132,8 @@ static int read_single_flag(int fd, struct tool_options *opt, __u8 idn,
 int do_flags(struct tool_options *opt)
 {
 	int fd;
-	int rc = OK;
-	__u8 opcode, flag_idn;
+	int rc = OK, flag_idn;
+	__u8 opcode;
 	struct flag_fields *tmp;
 	struct ufs_bsg_request bsg_req = {0};
 	struct ufs_bsg_reply bsg_rsp = {0};
