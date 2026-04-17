@@ -33,7 +33,7 @@ Run the tool without arguments or with -h/--help
 E.g. Run:  
 ./ufs-utils --help  
 Output:
-    ufs-utils help|--help|-h Show the help.
+    ufs-utils help|--help|-h Show the help
 
         ufs-utils -v
                 Show the version.
