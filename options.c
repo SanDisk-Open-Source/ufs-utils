@@ -882,7 +882,7 @@ static int verify_output_data(struct tool_options *options)
 		goto out;
 	}
 
-	len = strlen(optarg);
+	len = strlen(optarg) + 1;
 	if (len >= PATH_MAX) {
 		print_error("Output path is too long");
 		goto out;
