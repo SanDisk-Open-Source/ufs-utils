@@ -1171,6 +1171,7 @@ static int do_unit_desc(int fd, __u8 lun, char *data_file)
 			goto out;
 		}
 		printf("Unit Descriptor was written into %s file\n", data_file);
+		rc = 0;
 	}
 
 out:
@@ -1205,6 +1206,7 @@ static int do_interconnect_desc(int fd, char *data_file)
 		}
 		printf("Interconnect Descriptor was written into %s file\n",
 		       data_file);
+		rc = 0;
 	}
 out:
 	return rc;
@@ -1237,6 +1239,7 @@ static int do_geo_desc(int fd, char *data_file)
 		}
 		printf("Geometry Descriptor was written into %s file\n",
 		       data_file);
+		rc = 0;
 	}
 
 out:
@@ -1279,6 +1282,7 @@ static int do_power_desc(int fd, char *data_file)
 		}
 		printf("Power Descriptor was written into %s file\n",
 		       data_file);
+		rc = 0;
 	}
 
 out:
@@ -1311,6 +1315,7 @@ static int do_health_desc(int fd, char *data_file)
 		}
 		printf("Device Health Descriptor was written into %s file\n",
 		       data_file);
+		rc = 0;
 	}
 
 out:
@@ -1363,6 +1368,7 @@ static int do_string_desc(int fd, char *str_data, __u8 idn, __u8 opr,
 			}
 			printf("String Descriptor was written into %s file\n",
 			       data_file);
+			rc = 0;
 		}
 	}
 out:
@@ -1494,6 +1500,7 @@ int do_vendor_desc(int fd, __u8 opt, __u8 idn, char *data_file)
 			}
 			printf("Reserved/Vendor Descriptor was written into %s file\n",
 			       data_file);
+			rc = 0;
 		}
 	}
 
@@ -1787,6 +1794,7 @@ int do_device_desc(int fd, __u8 *desc_buff, char *data_file)
 		}
 		printf("Device Descriptor was written into %s file\n",
 		       data_file);
+		rc = 0;
 	}
 
 out:
