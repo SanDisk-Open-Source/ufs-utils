@@ -144,7 +144,7 @@ static int do_arpmb_key(int ufs_bsg_fd, const unsigned char *key, __u8 region)
 			  RPMB_WRITE_KEY);
 
 	if (!ret) {
-		if (ufs_arpmb_resp.ehs_rsp.meta.result != 0) {
+		if (RPMB_OP_STATUS(ufs_arpmb_resp.ehs_rsp.meta.result)) {
 			print_operation_error(be16toh(ufs_arpmb_resp.ehs_rsp.meta.result));
 			goto out;
 		} else {
@@ -170,12 +170,14 @@ static int do_arpmb_read_counter(int fd, __u32 *cnt, __u8 region, __u8 sg_type, 
 	ret = do_arpmb_op(fd, &ufs_arpmb_req, &ufs_arpmb_resp, region, 0, 0, RPMB_READ_CNT);
 
 	if (!ret) {
-		if (ufs_arpmb_resp.ehs_rsp.meta.result != 0) {
+		if (RPMB_OP_STATUS(ufs_arpmb_resp.ehs_rsp.meta.result)) {
 			print_operation_error(be16toh(ufs_arpmb_resp.ehs_rsp.meta.result));
 		} else {
 			if (prn_cnt)
 				printf("ARPMB write counter = %u\n",
 					be32toh(ufs_arpmb_resp.ehs_rsp.meta.write_counter));
+			if (RPMB_WCNT_EXPIRED(ufs_arpmb_resp.ehs_rsp.meta.result))
+				print_warn("ARPMB write counter expired");
 			*cnt = be32toh(ufs_arpmb_resp.ehs_rsp.meta.write_counter);
 		}
 	}
@@ -241,7 +243,7 @@ static int do_read_arpmb(int fd, int out_fd, unsigned char *key, int start_addr,
 			print_error("ARPMB operation is failed in addr %d ", start_addr);
 			goto out;
 		}
-		if (ufs_arpmb_rsp.ehs_rsp.meta.result != 0) {
+		if (RPMB_OP_STATUS(ufs_arpmb_rsp.ehs_rsp.meta.result)) {
 			print_operation_error(be16toh(ufs_arpmb_rsp.ehs_rsp.meta.result));
 			ret = -EINVAL;
 			goto out;
@@ -374,7 +376,7 @@ static int do_write_arpmb(int fd, const unsigned char *key, int input_fd, __u32 
 			goto out;
 
 		/* Check RPMB response */
-		if (ufs_arpmb_rsp.ehs_rsp.meta.result != 0) {
+		if (RPMB_OP_STATUS(ufs_arpmb_rsp.ehs_rsp.meta.result)) {
 			print_operation_error(be16toh(ufs_arpmb_rsp.ehs_rsp.meta.result));
 			ret = -EINVAL;
 			goto out;

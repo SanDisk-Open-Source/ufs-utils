@@ -164,7 +164,7 @@ static int do_key(int fd, const unsigned char *key, __u8 region, __u8 sg_type)
 	ret = do_rpmb_op(fd, &frame_in, 1, &frame_out, 1, region, sg_type);
 
 	if (!ret) {
-		if (frame_out.result != 0) {
+		if (RPMB_OP_STATUS(frame_out.result)) {
 			print_operation_error(be16toh(frame_out.result));
 			goto out;
 		} else
@@ -186,12 +186,14 @@ static int do_read_counter(int fd, __u32 *cnt, __u8 region, __u8 sg_type,
 	ret = do_rpmb_op(fd, &frame_in, 1, &frame_out, 1, region, sg_type);
 
 	if (!ret) {
-		if (frame_out.result != 0) {
+		if (RPMB_OP_STATUS(frame_out.result)) {
 			print_operation_error(be16toh(frame_out.result));
 		} else {
 			if (prn_cnt)
 				printf("RPMB write counter = %u\n",
 					be32toh(frame_out.write_counter));
+			if (RPMB_WCNT_EXPIRED(frame_out.result))
+				print_warn("RPMB write counter expired");
 			*cnt = be32toh(frame_out.write_counter);
 		}
 	}
@@ -264,7 +266,7 @@ static int do_read_rpmb(int fd, int out_fd, unsigned char *key,
 				    start_addr);
 			goto out;
 		}
-		if (frames_out[0].result != 0) {
+		if (RPMB_OP_STATUS(frames_out[0].result)) {
 			print_operation_error(be16toh(frames_out[0].result));
 			ret = -EINVAL;
 			goto out;
@@ -403,7 +405,7 @@ static int do_write_rpmb(int fd, const unsigned char *key, int input_fd,
 			goto out;
 
 		/* Check RPMB response */
-		if (frame_out.result != 0) {
+		if (RPMB_OP_STATUS(frame_out.result)) {
 			print_operation_error(be16toh(frame_out.result));
 			ret = -EINVAL;
 			goto out;
@@ -452,7 +454,7 @@ static int do_read_conf_block(int fd, const unsigned char *key, __u8 lun,
 		print_error("Fail to read Secure Write Config Block");
 		goto out;
 	}
-	if (frame_out.result != 0) {
+	if (RPMB_OP_STATUS(frame_out.result)) {
 		print_operation_error(be16toh(frame_out.result));
 		goto out;
 	}
@@ -512,7 +514,7 @@ static int do_write_conf_block(int fd, const unsigned char *key, int input_fd,
 	}
 
 	/* Check RPMB response */
-	if (frame_out.result != 0) {
+	if (RPMB_OP_STATUS(frame_out.result)) {
 		print_operation_error(be16toh(frame_out.result));
 		ret = -EINVAL;
 	} else
@@ -547,7 +549,7 @@ static int do_rpmb_purge_enable(int fd, const unsigned char *key, __u32 cnt,
 	}
 
 	/* Check RPMB response */
-	if (frame_out.result != 0) {
+	if (RPMB_OP_STATUS(frame_out.result)) {
 		print_operation_error(be16toh(frame_out.result));
 		ret = -EINVAL;
 	} else
@@ -575,7 +577,7 @@ static int do_read_rpmb_purge_status(int fd, __u8 region, __u8 sg_type)
 	}
 
 	/* Check RPMB response */
-	if (frame_out.result != 0) {
+	if (RPMB_OP_STATUS(frame_out.result)) {
 		print_operation_error(be16toh(frame_out.result));
 		ret = -EINVAL;
 	} else {

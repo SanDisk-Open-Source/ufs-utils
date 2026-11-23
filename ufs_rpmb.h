@@ -16,6 +16,17 @@
 
 #define DEFAULT_RPMB_NUM_BLOCKS 64
 
+/*
+ * RPMB Result: bit 7 is the Write Counter Status (set once the write
+ * counter has expired), bits 6:0 are the Operation Status.
+ */
+#define RPMB_RESULT_WCNT_EXPIRED 0x80
+#define RPMB_OP_RESULT_MASK 0x7F
+
+/* Fields of a big-endian RPMB Result */
+#define RPMB_OP_STATUS(res) (be16toh(res) & RPMB_OP_RESULT_MASK)
+#define RPMB_WCNT_EXPIRED(res) (be16toh(res) & RPMB_RESULT_WCNT_EXPIRED)
+
 /* RPMB Data Area: 128 Kbytes minimum, 16 Mbytes maximum.
  * For the normal RPMB mode, since the data packed in RPMB message, the size of each frame is 256
  * bytes. so its MAX_ADDRESS == 0xFFFF.
@@ -76,10 +87,15 @@ int do_arpmb(struct tool_options *opt);
 
 static inline void  print_operation_error(__u16 result)
 {
-	if (result <= 0xC)
-		printf("\n %s\n", rpmb_res_txt[result]);
+	__u16 op_status = result & RPMB_OP_RESULT_MASK;
+
+	if (op_status <= 0xC)
+		printf("\n %s", rpmb_res_txt[op_status]);
 	else
-		printf("\n Unsupported RPMB Operation Error %d\n", result);
+		printf("\n Unsupported RPMB Operation Error %d", op_status);
+	if (result & RPMB_RESULT_WCNT_EXPIRED)
+		printf(" (write counter expired)");
+	printf("\n");
 }
 
 static inline unsigned char *get_auth_key(char *key_path, unsigned char * key_buff)
